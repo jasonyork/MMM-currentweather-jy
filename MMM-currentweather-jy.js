@@ -386,7 +386,6 @@ Module.register("MMM-currentweather-jy", {
 		// this.show(this.config.animationSpeed, {lockString:this.identifier});
 		this.loaded = true;
 		this.updateDom(this.config.animationSpeed);
-		this.sendNotification("CURRENTWEATHER_DATA", {data: data});
 	},
 
 	/* scheduleUpdate()
