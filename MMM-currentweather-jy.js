@@ -7,7 +7,7 @@
  * MIT Licensed.
  */
 
-Module.register("MMM-currentweather-jy",{
+Module.register("MMM-currentweather-jy", {
 
 	// Default module config.
 	defaults: {
@@ -97,12 +97,12 @@ Module.register("MMM-currentweather-jy",{
 		this.windDirection = null;
 		this.sunriseSunsetTime = null;
 		this.sunriseSunsetIcon = null;
-		this.temperature = null;
+		this.outdoorTemperature = null;
+		this.indoorTemperature = null;
 		this.weatherType = null;
 
 		this.loaded = false;
 		this.scheduleUpdate(this.config.initialLoadDelay);
-
 	},
 
 	// add extra information of current weather
@@ -111,7 +111,6 @@ Module.register("MMM-currentweather-jy",{
 
 		var small = document.createElement("div");
 		small.className = "normal medium";
-
 
 		var windIcon = document.createElement("span");
 		windIcon.className = "wi wi-strong-wind dimmed";
@@ -182,12 +181,14 @@ Module.register("MMM-currentweather-jy",{
 
 		var weatherIcon = document.createElement("span");
 		weatherIcon.className = "wi weathericon " + this.weatherType;
-		large.appendChild(weatherIcon);
 
 		var temperature = document.createElement("span");
 		temperature.className = "bright";
-		temperature.innerHTML = " " + this.temperature + "&deg;" + this.degreeLabel();
-		if (this.temperature) { large.appendChild(temperature); }
+		temperature.innerHTML = " " + this.outdoorTemperature + "&deg;" + this.degreeLabel();
+		if (this.outdoorTemperature) {
+			large.appendChild(weatherIcon);
+			large.appendChild(temperature);
+		}
 
 		if (this.config.showIndoorTemperature && this.indoorTemperature) {
 			var indoorIcon = document.createElement("span");
@@ -208,15 +209,15 @@ Module.register("MMM-currentweather-jy",{
 		var degreeLabel = "";
 		if (this.config.degreeLabel) {
 			switch (this.config.units ) {
-				case "metric":
-					degreeLabel = "C";
-					break;
-				case "imperial":
-					degreeLabel = "F";
-					break;
-				case "default":
-					degreeLabel = "K";
-					break;
+			case "metric":
+				degreeLabel = "C";
+				break;
+			case "imperial":
+				degreeLabel = "F";
+				break;
+			case "default":
+				degreeLabel = "K";
+				break;
 			}
 		}
 		return degreeLabel;
@@ -233,10 +234,10 @@ Module.register("MMM-currentweather-jy",{
 
 	// Override notification handler.
 	notificationReceived: function(notification, payload, sender) {
-		if (notification === "DOM_OBJECTS_CREATED") {
-			if (this.config.appendLocationNameToHeader) {
-				this.hide(0, {lockString: this.identifier});
-			}
+		if (sender) {
+			Log.log(this.name + " received a module notification: " + notification + " from sender: " + sender.name);
+		} else {
+			Log.log(this.name + " received a system notification: " + notification);
 		}
 		if (notification === "CALENDAR_EVENTS") {
 			var senderClasses = sender.data.classes.toLowerCase().split(" ");
@@ -256,15 +257,15 @@ Module.register("MMM-currentweather-jy",{
 		}
 		if (notification === "INDOOR_TEMPERATURE") {
 			this.indoorTemperature = this.roundValue(payload);
-			this.updateDom(self.config.animationSpeed);
+			this.updateDom(this.config.animationSpeed);
 		}
 		if (notification === "OUTDOOR_TEMPERATURE") {
-			this.temperature = this.roundValue(payload);
-			this.updateDom(self.config.animationSpeed);
+			this.outdoorTemperature = this.roundValue(payload);
+			this.updateDom(this.config.animationSpeed);
 		}
 		if (notification === "OUTDOOR_HUMIDITY") {
 			this.humidity = this.roundValue(payload);
-			this.updateDom(self.config.animationSpeed);
+			this.updateDom(this.config.animationSpeed);
 		}
 	},
 
@@ -345,15 +346,11 @@ Module.register("MMM-currentweather-jy",{
 			return;
 		}
 
-		// this.humidity = parseFloat(data.main.humidity);
-		// this.temperature = this.roundValue(data.main.temp);
-
 		if (this.config.useBeaufort){
 			this.windSpeed = this.ms2Beaufort(this.roundValue(data.wind.speed));
 		}else {
 			this.windSpeed = parseFloat(data.wind.speed).toFixed(0);
 		}
-
 
 		this.windDirection = this.deg2Cardinal(data.wind.deg);
 		this.weatherType = this.config.iconTable[data.weather[0].icon];
@@ -386,8 +383,7 @@ Module.register("MMM-currentweather-jy",{
 		this.sunriseSunsetTime = timeString;
 		this.sunriseSunsetIcon = (sunrise < now && sunset > now) ? "wi-sunset" : "wi-sunrise";
 
-
-		this.show(this.config.animationSpeed, {lockString:this.identifier});
+		// this.show(this.config.animationSpeed, {lockString:this.identifier});
 		this.loaded = true;
 		this.updateDom(this.config.animationSpeed);
 		this.sendNotification("CURRENTWEATHER_DATA", {data: data});
