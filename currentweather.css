@@ -1,4 +1,4 @@
-.currentweather .weathericon, .currentweather .fa-home {
+.MMM-currentweather-jy .weathericon, .MMM-currentweather-jy .fa-home {
   font-size: 75%;
   line-height: 65px;
   display: inline-block;
@@ -7,10 +7,10 @@
   transform: translate(0, -3px);
 }
 
-.currentweather .humidityIcon {
+.MMM-currentweather-jy .humidityIcon {
   padding-right: 4px;
 }
 
-.currentweather .humidity-padding {
+.MMM-currentweather-jy .humidity-padding {
   padding-bottom: 6px;
 }

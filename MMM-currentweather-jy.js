@@ -100,6 +100,7 @@ Module.register("MMM-currentweather-jy", {
 		this.outdoorTemperature = null;
 		this.indoorTemperature = null;
 		this.weatherType = null;
+		this.miosUpdate = null;
 
 		this.loaded = false;
 		this.scheduleUpdate(this.config.initialLoadDelay);
@@ -201,6 +202,13 @@ Module.register("MMM-currentweather-jy", {
 			large.appendChild(indoorTemperatureElem);
 		}
 
+		if (this.miosUpdate) {
+			var updatedAt = document.createElement("div");
+			updatedAt.innerHTML = "Last Updated at " + moment(this.miosUpdate).format("MMM Do, h:mm a");
+			updatedAt.className = "dimmed light small";
+			large.appendChild(updatedAt);
+		}
+
 		wrapper.appendChild(large);
 		return wrapper;
 	},
@@ -257,14 +265,17 @@ Module.register("MMM-currentweather-jy", {
 		}
 		if (notification === "INDOOR_TEMPERATURE") {
 			this.indoorTemperature = this.roundValue(payload);
+			this.miosUpdate = Date.now();
 			this.updateDom(this.config.animationSpeed);
 		}
 		if (notification === "OUTDOOR_TEMPERATURE") {
 			this.outdoorTemperature = this.roundValue(payload);
+			this.miosUpdate = Date.now();
 			this.updateDom(this.config.animationSpeed);
 		}
 		if (notification === "OUTDOOR_HUMIDITY") {
 			this.humidity = this.roundValue(payload);
+			this.miosUpdate = Date.now();
 			this.updateDom(this.config.animationSpeed);
 		}
 	},
